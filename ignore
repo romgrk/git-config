@@ -1,0 +1,15 @@
+.sass-cache/**
+node_modules/
+bower_components/
+.tags
+tags
+.vimrc
+.ycm_extra_conf.py
+.tern-project
+.vscode
+.clang_complete
+__pycache__
+local_vimrc
+.cquery
+.env
+.vimspector.json

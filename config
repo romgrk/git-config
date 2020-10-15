@@ -1,0 +1,70 @@
+
+[alias]
+    # Fetch Pull Request
+    fpr = "!sh -c 'nr=\"$1\" ; shift ; git fetch upstream refs/pull/$nr/head:pr-$nr \"$@\"' -"
+
+    # Logging
+    log-pretty = log --date=short --pretty='%C(yellow)%C(bold)%h  %C(reset)%C(green)(%cr)%C(reset) %C(reset)%s %C(246)- %an'
+
+    wh = whatchanged
+    wp = whatchanged -p
+    wu = whatchanged -p -w --word-diff=color
+
+    # Rebasing
+    ra = rebase --abort
+    ri = rebase --interactive
+    rc = rebase --continue
+
+[credential]
+    helper = store
+
+[grep]
+    linenumber = true
+
+[diff]
+    compactionHeuristic = true
+
+[push]
+    default = simple
+
+[pull]
+    rebase = false
+
+# Work locally in spaces on a repository that's tabbed
+[filter "indent"]
+    clean = unexpand --tabs=4 --first-only
+    smudge = expand --tabs=4 --initial
+
+# Force the use of spaces
+[filter "detab"]
+    clean = expand --tabs=4 --initial  # Expand tabs to spaces
+    smudge = cat  # Take file back (with spaces)
+
+
+#
+# diff-so-fancy
+# https://github.com/so-fancy/diff-so-fancy
+#
+
+[core]
+    pager = diff-so-fancy | less --tabs=4 -RFX
+
+[color]
+    ui = true
+
+[color "diff-highlight"]
+    oldNormal = red bold
+    oldHighlight = red bold 52
+    newNormal = green bold
+    newHighlight = green bold 22
+
+[color "diff"]
+    meta = yellow
+    frag = magenta bold
+    commit = yellow bold
+    old = red bold
+    new = green bold
+    whitespace = red reverse
+
+
+# vim: ft=gitconfig
