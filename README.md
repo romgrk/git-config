@@ -1,6 +1,6 @@
 # git-config
 
-This is my git configuration files. You should use it.
+This is my git config. You should use it. You have more cool tricks? Open a PR :)
 
 ### Install
 
