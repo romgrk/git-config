@@ -1,0 +1,171 @@
+#!/usr/bin/env node
+/*
+ * pre-commit hook
+ *
+ * Prevents commit if one of the excluded keywords is found in the
+ * content to be committed.
+ *
+ * To activate:
+      ln -s $HOME/.config/git /path/to/git-utils
+      git config --global core.hooksPath ~/.config/git/hooks
+ */
+
+const KEYWORDS =
+  process.env.GIT_PREVENT_COMMIT ?
+    process.env.GIT_PREVENT_COMMIT.split(',') :
+    ['XXX', 'PREVENT_COMMIT']
+
+
+
+const exec = require('child_process').execSync
+const diff = exec('git diff --staged').toString().trim()
+const lines = diff.split('\n')
+
+if (!containsKeywords(lines)) {
+  process.exit(0)
+}
+
+showMatches(parseDiff(lines))
+
+process.exit(1)
+
+
+
+
+
+// Functions
+
+function containsKeywords(lines) {
+  return lines.some(line => {
+    if (line.startsWith('+')
+        && !line.startsWith('+++')
+        && match(line))
+      return true
+    return false
+  })
+}
+
+function match(line) {
+  return KEYWORDS.some(k => line.includes(k))
+}
+
+function showMatches(infos) {
+  console.log(error('==> Error: some excluded keywords were found'))
+  console.log(grey('Run with ') + '--no-verify' + grey(' to ignore.'))
+
+  infos.forEach(info => {
+    const matches = []
+    info.hunks.forEach(hunk => {
+      hunk.nextLines.forEach((line, i) => {
+        if (match(line))
+          matches.push({
+            line: hunk.nextStart + i,
+            text: line,
+          })
+      })
+    })
+    if (matches.length !== 0) {
+      console.log()
+      console.log(bold(info.next))
+      matches.forEach(m => {
+        console.log(`  ${grey(m.line + ':')} ${m.text}`)
+      })
+    }
+  })
+}
+
+function parseDiff(lines) {
+  const infos = []
+
+  let currentIndex = 0
+  let line
+
+  const info = () => infos[infos.length - 1]
+  const hunk = () => {
+    const i = info()
+    return i ? i.hunks[i.hunks.length - 1] : undefined
+  }
+
+  while ((line = lines[currentIndex]) !== undefined) {
+    if (line.startsWith('---')) {
+      if (info())
+        info().end = currentIndex - 1
+      infos.push(newInfo())
+      info().start = currentIndex
+      info().previous = line.replace('--- a/', '')
+    }
+    else if (line.startsWith('+++')) {
+      info().next = line.replace('+++ b/', '')
+    }
+    else if (line.startsWith('@@')) {
+      if (!lines[currentIndex - 1].startsWith('+++'))
+        hunk().end = currentIndex - 1
+      info().hunks.push(newHunk())
+      const [
+        previousStart,
+        nextStart
+      ] = line.slice(4).replace(/ @@.*/, '').replace(/,\d+/g, '').split(' +').map(Number)
+      hunk().start = currentIndex
+      hunk().previousStart = previousStart
+      hunk().nextStart = nextStart
+    }
+    else if (line.startsWith(' ')) {
+      hunk().previousLines.push(line.slice(1))
+      hunk().nextLines.push(line.slice(1))
+    }
+    else if (line.startsWith('-')) {
+      hunk().previousLines.push(line.slice(1))
+    }
+    else if (line.startsWith('+')) {
+      hunk().nextLines.push(line.slice(1))
+    }
+    else if (line.startsWith('diff')) {
+      if (hunk())
+        hunk().end = currentIndex - 1
+    }
+    currentIndex++
+  }
+
+  hunk().end = currentIndex - 1
+
+  return infos
+}
+
+function newInfo() {
+  return {
+    previous: null,
+    next: null,
+    hunks: [],
+    start: -1,
+    end: -1,
+  }
+}
+
+function newHunk() {
+  return {
+    previousStart: -1,
+    nextStart: -1,
+    previousLines: [],
+    nextLines: [],
+    start: -1,
+    end: -1,
+  }
+}
+
+function esc(seq, text) {
+  if (!process.stdout.isTTY)
+    return text
+  return `\x1b[${seq}m${text}\x1b[0m`
+}
+
+function bold(text) {
+  return esc('1', text)
+}
+
+function grey(text) {
+  return esc('38;5;245', text)
+}
+
+function error(text) {
+  return esc('1;91', text)
+}
