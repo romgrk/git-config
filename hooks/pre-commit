@@ -5,8 +5,7 @@
  * Prevents commit if one of the excluded keywords is found in the
  * content to be committed.
  *
- * To activate:
-      ln -s $HOME/.config/git /path/to/git-utils
+ * To activate (assuming the git-config is cloned at ~/.config/git):
       git config --global core.hooksPath ~/.config/git/hooks
  */
 
