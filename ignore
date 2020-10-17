@@ -13,3 +13,4 @@ local_vimrc
 .cquery
 .env
 .vimspector.json
+.clangd
