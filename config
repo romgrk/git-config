@@ -4,7 +4,7 @@
     fpr = "!sh -c 'nr=\"$1\" ; shift ; git fetch upstream refs/pull/$nr/head:pr-$nr \"$@\"' -"
 
     # Logging
-    log-pretty = log --date=short --pretty='%C(yellow)%C(bold)%h  %C(reset)%C(green)(%cr)%C(reset) %C(reset)%s %C(246)- %an'
+    log-pretty = log --date=short --pretty='%C(yellow)%C(bold)%h  %C(reset)%C(green)(%cr)%C(reset) %C(yellow)%C(bold)%d %C(reset)%s %C(246)- %an'
 
     wh = whatchanged
     wp = whatchanged -p
