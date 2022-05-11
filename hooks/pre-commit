@@ -12,7 +12,7 @@
 const KEYWORDS =
   process.env.GIT_PREVENT_COMMIT ?
     process.env.GIT_PREVENT_COMMIT.split(',') :
-    ['XXX', 'PREVENT_COMMIT']
+    ['PREVENT_COMMIT']
 
 
 
